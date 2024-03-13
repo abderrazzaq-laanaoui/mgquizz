@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import PocketBase from 'pocketbase';
+import pb from './lib/pocketbase';
 const questions = [
     {
       question: "abc",
@@ -48,9 +48,6 @@ const questions = [
       ],
     },
   ];
-
-//const pb = new PocketBase("https://6cee-2001-660-7304-f-3-00-865b.ngrok-free.app");
-const pb = new PocketBase("http://127.0.0.1:8090");
 
 function App() {
   // Properties
