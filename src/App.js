@@ -7,7 +7,7 @@ function App() {
   // Properties
   const [showResults, setShowResults] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(29);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [record, setRecord] = useState(null);
   const [answers, setAnswers] = useState([]);
@@ -36,7 +36,14 @@ function App() {
     }
 
     // add the answer to the list of answers
-    setAnswers([...answers, answerIndex]);
+    const answer = {
+      question_id: record.questions[questionIndex].id,
+      answer_id: answerIndex
+    };
+
+    const newAnswers = [...answers];
+    newAnswers[questionIndex] = answer;
+    setAnswers(newAnswers);
   };
 
   /* Resets the game back to default */
@@ -60,10 +67,26 @@ function App() {
     setCurrentQuestion(currentQuestion - 1);
   }
 
-  const submitQuizz = () => {
-    // to calculate the score we need to compare the answers with the correct answers
-    // the corre
-  }
+const submit =()=> {
+  console.log("answers", answers);
+  console.log("rep correctes", record.reponses_correctes);
+  const score = answers.reduce((acc, curr) => {
+    const correctAnswer = record.reponses_correctes.find(item => item.question_id === curr.question_id);
+    if (curr.answer_id) {
+      if (correctAnswer && correctAnswer.correct_answer_id === curr.answer_id) {
+        return acc + 2;
+      } else {
+        return acc - 1;
+      }
+    } else {
+      return acc;
+    }
+  }, 0);
+  setScore(score);
+  setShowResults(true);
+  setShowSubmit(false);
+  console.log(`User's score is ${score}`);
+}
 
 
   return (
@@ -75,13 +98,13 @@ function App() {
 
 
         {/* 3. Show results or show the question game  */}
-        {showResults? (<>Your Score is</>) : (showSubmit ? (
+        {showResults? (<>Your Score is {score}</>) : (showSubmit ? (
           /* 4. Confirm that you wanna submit page */
           <div className="final-results" >
             <h2>Are you sure you want to submit?</h2>
             <button
             className="confirm-button"
-              onClick={() => submitQuizz()}
+              onClick={() => submit()}
             >
               Submit
             </button>
