@@ -1,15 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-
-function App() {
-  // Properties
-  const [showResults, setShowResults] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-
-  const questions = [
+import PocketBase from 'pocketbase';
+const questions = [
     {
-      text: "What is the capital of America?",
+      question: "abc",
       options: [
         { id: 0, text: "New York City", isCorrect: false },
         { id: 1, text: "Boston", isCorrect: false },
@@ -18,7 +12,7 @@ function App() {
       ],
     },
     {
-      text: "What year was the Constitution of America written?",
+      question: "What year was the Constitution of America written?",
       options: [
         { id: 0, text: "1787", isCorrect: true },
         { id: 1, text: "1776", isCorrect: false },
@@ -55,6 +49,28 @@ function App() {
     },
   ];
 
+//const pb = new PocketBase("https://6cee-2001-660-7304-f-3-00-865b.ngrok-free.app");
+const pb = new PocketBase("http://127.0.0.1:8090");
+
+function App() {
+  // Properties
+  const [showResults, setShowResults] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [record, setRecord] = useState(null);
+  const [records, setRecords] = useState(0);
+  const [result, setResult] = useState(0);
+  
+  useEffect(()=>{
+  async function fetchData(){
+  const record = await pb.collection('campagne').getOne('m9o9y1jc2i4nz28');
+  //const record = await pb.collection('campagne').getOne('94pbzhsj2v7xt7b'); //pour les questions de devops
+  console.log("record",record);
+  setRecord(record);
+}
+fetchData()},record)
+  
+
   // Helper Functions
 
   /* A possible answer was clicked */
@@ -64,7 +80,7 @@ function App() {
       setScore(score + 1);
     }
 
-    if (currentQuestion + 1 < questions.length) {
+    if (currentQuestion + 1 < record.questions.length) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setShowResults(true);
@@ -79,9 +95,10 @@ function App() {
   };
 
   return (
+    <>{record ?
     <div className="App">
       {/* 1. Header  */}
-      <h1>USA Quiz 🇺🇸</h1>
+      <h1>{record.nom || ""}</h1>
 
       {/* 2. Current Score  */}
       <h2>Score: {score}</h2>
@@ -92,8 +109,8 @@ function App() {
         <div className="final-results">
           <h1>Final Results</h1>
           <h2>
-            {score} out of {questions.length} correct - (
-            {(score / questions.length) * 100}%)
+            {score} out of {record.questions.length} correct - (
+            {(score / record.questions.length) * 100}%)
           </h2>
           <button onClick={() => restartGame()}>Restart game</button>
         </div>
@@ -102,26 +119,37 @@ function App() {
         <div className="question-card">
           {/* Current Question  */}
           <h2>
-            Question: {currentQuestion + 1} out of {questions.length}
+            Question: {currentQuestion + 1} out of {record.questions.length}
           </h2>
-          <h3 className="question-text">{questions[currentQuestion].text}</h3>
+          <h3 className="question-text">{record.questions[currentQuestion].question}</h3>
 
           {/* List of possible answers  */}
           <ul>
-            {questions[currentQuestion].options.map((option) => {
-              return (
                 <li
-                  key={option.id}
-                  onClick={() => optionClicked(option.isCorrect)}
+                  onClick={() => optionClicked(currentQuestion, 1)}
                 >
-                  {option.text}
+            {record.questions[currentQuestion].answers[1]}
                 </li>
-              );
-            })}
+                <li
+                  onClick={() => optionClicked(currentQuestion, 2)}
+                >
+            {record.questions[currentQuestion].answers[2]}
+                </li>
+                <li
+                  onClick={() => optionClicked(currentQuestion, 3)}
+                >
+            {record.questions[currentQuestion].answers[3]}
+                </li>
+                <li
+                  onClick={() => optionClicked(currentQuestion, 4)}
+                >
+            {record.questions[currentQuestion].answers[4]}
+                </li>
           </ul>
         </div>
       )}
-    </div>
+    </div> : <div>Loading...</div>}
+    </>
   );
 }
 
