@@ -6,6 +6,7 @@ import pb from './lib/pocketbase';
 function App() {
   // Properties
   const [showResults, setShowResults] = useState(false);
+  const [showStart, setShowStart] = useState(true);
   const [showSubmit, setShowSubmit] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -46,16 +47,16 @@ function App() {
     setAnswers(newAnswers);
   };
 
-  /* Resets the game back to default */
-  const restartGame = () => {
-    setScore(0);
-    setCurrentQuestion(0);
-    setShowResults(false);
+  /* Exits the game */
+  const exit = () => {
+    window.location.href = "https://www.mgdis.fr/";
   };
-
   const nextQuestion = () => {
-    if (currentQuestion === record.questions.length - 1) {
+    console.log("currentQuestion", currentQuestion+1);
+    console.log("record.questions.length", record.questions.length-1);
+    if (currentQuestion === record.questions.length -1 ) {
       setShowSubmit(true);
+      return;
     }
     setCurrentQuestion(currentQuestion + 1);
   }
@@ -67,26 +68,26 @@ function App() {
     setCurrentQuestion(currentQuestion - 1);
   }
 
-const submit =()=> {
-  console.log("answers", answers);
-  console.log("rep correctes", record.reponses_correctes);
-  const score = answers.reduce((acc, curr) => {
-    const correctAnswer = record.reponses_correctes.find(item => item.question_id === curr.question_id);
-    if (curr.answer_id) {
-      if (correctAnswer && correctAnswer.correct_answer_id === curr.answer_id) {
-        return acc + 2;
+  const submit = () => {
+    console.log("answers", answers);
+    console.log("rep correctes", record.reponses_correctes);
+    const score = answers.reduce((acc, curr) => {
+      const correctAnswer = record.reponses_correctes.find(item => item.question_id === curr.question_id);
+      if (curr && curr.answer_id) {
+        if (correctAnswer && correctAnswer.correct_answer_id === curr.answer_id) {
+          return acc + 2;
+        } else {
+          return acc - 1;
+        }
       } else {
-        return acc - 1;
+        return acc;
       }
-    } else {
-      return acc;
-    }
-  }, 0);
-  setScore(score);
-  setShowResults(true);
-  setShowSubmit(false);
-  console.log(`User's score is ${score}`);
-}
+    }, 0);
+    setScore(score);
+    setShowResults(true);
+    setShowSubmit(false);
+    console.log(`User's score is ${score}`);
+  }
 
 
   return (
@@ -94,23 +95,26 @@ const submit =()=> {
       (<div className="App">
         {/* 1. Header  */}
         <h1>{record.nom || ""}</h1>
-
-
-
         {/* 3. Show results or show the question game  */}
-        {showResults? (<>Your Score is {score}</>) : (showSubmit ? (
+        {showResults ? (
+        <div className="final-results" >
+          Merci pour votre participation
+          <h2>Ton Score est {score}</h2>
+          <button className="start-button" onClick={() => exit()}>Exit</button>
+        </div>
+        ) : (showSubmit ? (
           /* 4. Confirm that you wanna submit page */
           <div className="final-results" >
             <h2>Are you sure you want to submit?</h2>
             <button
-            className="confirm-button"
+              className="confirm-button"
               onClick={() => submit()}
             >
               Submit
             </button>
-            <button 
-            className="cancel-button"
-            onClick={() => setShowSubmit(false)}>Cancel</button>
+            <button
+              className="cancel-button"
+              onClick={() => setShowSubmit(false)}>Cancel</button>
           </div>
         ) : (
           /* 5. Question Card  */
@@ -130,9 +134,9 @@ const submit =()=> {
               ))}
             </ul>
             <div className="question-nav">
-              <button className="nav-button" onClick={() => previousQuestion()}  disabled={currentQuestion === 0}>Previous</button>
-          
-              <button className="nav-button" onClick={() => nextQuestion()} disabled={currentQuestion === record.questions.length - 1} >Next</button>
+              <button className="nav-button" onClick={() => previousQuestion()} disabled={currentQuestion === 0}>Previous</button>
+
+              <button className="nav-button" onClick={() => nextQuestion()} disabled={currentQuestion === record.questions.length } >Next</button>
             </div>
           </div>
 
